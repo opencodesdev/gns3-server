@@ -28,6 +28,9 @@ import aiohttp
 import subprocess
 import os
 import re
+# Initialize the Docker client (you may want to move this to your manager or class as appropriate)
+docker_client = docker.from_env()
+
 
 from gns3server.utils.asyncio.telnet_server import AsyncioTelnetServer
 from gns3server.utils.asyncio.raw_command_server import AsyncioRawCommandServer
@@ -47,6 +50,7 @@ from .docker_error import (
 )
 
 import logging
+import docker
 log = logging.getLogger(__name__)
 
 
@@ -59,6 +63,7 @@ class DockerVM(BaseNode):
     :param project: Project instance
     :param manager: Manager instance
     :param image: Docker image
+    :param devices: List of devices to add to the container
     :param console: TCP console port
     :param console_type: Console type
     :param aux: TCP aux console port
@@ -69,7 +74,7 @@ class DockerVM(BaseNode):
     :param extra_volumes: Additional directories to make persistent
     """
 
-    def __init__(self, name, node_id, project, manager, image, console=None, aux=None, start_command=None,
+    def __init__(self, name, node_id, project, manager, image, console=None, aux=None, start_command=None, devices=None,
                  adapters=None, environment=None, console_type="telnet", console_resolution="1024x768",
                  console_http_port=80, console_http_path="/", extra_hosts=None, extra_volumes=[]):
 
@@ -80,6 +85,7 @@ class DockerVM(BaseNode):
             image = "{}:latest".format(image)
         self._image = image
         self._start_command = start_command
+        self.devices = devices or []
         self._environment = environment
         self._cid = None
         self._ethernet_adapters = []
@@ -135,6 +141,7 @@ class DockerVM(BaseNode):
             "node_directory": self.working_path,
             "extra_hosts": self.extra_hosts,
             "extra_volumes": self.extra_volumes,
+            "devices": self.devices,
         }
 
     def _get_free_display_port(self):
@@ -243,6 +250,21 @@ class DockerVM(BaseNode):
     @extra_volumes.setter
     def extra_volumes(self, extra_volumes):
         self._extra_volumes = extra_volumes
+
+    @property
+    def devices(self):
+        """
+        Returns the list of devices to add to the container.
+
+        :returns: List of devices
+        :rtype: list
+        """
+
+        return self._devices
+    
+    @devices.setter
+    def devices(self, devices):
+        self._devices = devices or []    
 
     async def _get_container_state(self):
         """
@@ -375,6 +397,7 @@ class DockerVM(BaseNode):
         params = {
             "Hostname": self._name,
             "Image": self._image,
+            "Devices": self.devices or [],
             "NetworkDisabled": True,
             "Tty": True,
             "OpenStdin": True,

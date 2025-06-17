@@ -96,7 +96,19 @@ DOCKER_TEMPLATE_PROPERTIES = {
         "type": "array",
         "default": []
     },
-    "custom_adapters": CUSTOM_ADAPTERS_ARRAY_SCHEMA
+    "custom_adapters": CUSTOM_ADAPTERS_ARRAY_SCHEMA,
+    "device": {
+        "descripton": "device to be passed to the container",
+        "type": "string",
+        "default": ""
+    },
+    "devices": {
+        "description": "List of devices to be passed to the container",
+        "type": "array",
+        "items": {"type": "string"},
+        "default": []
+    }
+
 }
 
 DOCKER_TEMPLATE_PROPERTIES.update(copy.deepcopy(BASE_TEMPLATE_PROPERTIES))
