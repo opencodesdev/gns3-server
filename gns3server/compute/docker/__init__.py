@@ -49,10 +49,14 @@ CHUNK_SIZE = 1024 * 8  # 8KB
 class Docker(BaseManager):
 
     _NODE_CLASS = DockerVM
+    
+    
 
     def __init__(self):
         super().__init__()
-        self.client = docker.from_env(version=DOCKER_MINIMUM_API_VERSION,DOCKER_HOST='unix://var/run/docker.sock',timeout=60)
+        os.environ['DOCKER_HOST'] = 'unix:///var/run/docker.sock'
+
+        self.client = docker.from_env(version=DOCKER_PREFERRED_API_VERSION,environment=os.environ)
         
         # Allow locking during ubridge operations
 
