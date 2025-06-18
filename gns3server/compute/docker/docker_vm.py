@@ -28,8 +28,7 @@ import aiohttp
 import subprocess
 import os
 import re
-# Initialize the Docker client (you may want to move this to your manager or class as appropriate)
-docker_client = docker.from_env()
+import docker
 
 
 from gns3server.utils.asyncio.telnet_server import AsyncioTelnetServer
@@ -114,6 +113,8 @@ class DockerVM(BaseNode):
             self.adapters = adapters
 
         self.mac_address = ""  # this will generate a MAC address
+
+        self.client = docker.from_env()
 
         log.debug("{module}: {name} [{image}] initialized.".format(module=self.manager.module_name,
                                                                    name=self.name,

@@ -34,6 +34,6 @@ WORKDIR /server
 
 RUN pip3 install --no-cache-dir -r /server/dev-requirements.txt
 
-EXPOSE 3080
+EXPOSE 3090
 
 CMD [ "python3", "-m", "gns3server", "--port", "3080" ]
